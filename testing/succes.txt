@@ -1,0 +1,142 @@
+[package]
+name = "rust"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+chrono = { version = "0.4.38", features = ["serde"] }
+dotenvy = "0.15.7"
+futures = "0.3.30"
+serde = { version = "1.0.201", features = ["derive"] }
+serde_json = "1.0.117"
+sqlx = { version="0.7.4", features = ["postgres", "runtime-tokio-rustls","chrono"] }
+tokio = { version = "1.37.0", features = ["full"] }
+
+
+
+
+
+
+use std::error::Error;
+use std::fs::File;
+use std::io::Read;
+use chrono::NaiveDate;
+use serde_json::from_reader;
+//use sqlx::Row;
+//use futures::TryStreamExt;
+use serde::Deserialize;
+
+#[derive(Deserialize, Debug)]
+struct Data {
+  //pub data_id: i32,
+  pub first_name: String,
+  pub last_name: String,
+  pub birthdate: NaiveDate,
+  pub salary: i32,
+}
+
+//async fn create(data: &Data, pool: &sqlx::PgPool) -> Result<(), Box<dyn Error>> {
+//  let query = "INSERT INTO users_list (first_name, last_name, birthdate, salary) VALUES ($1, $2, $3, $4)";
+//
+//  sqlx::query(query)
+//    .bind(&data.first_name)
+//    .bind(&data.last_name)
+//    .bind(&data.birthdate as &NaiveDate)
+//    .bind(&data.salary)
+//    .execute(pool)
+//    .await?;
+//
+//    return Ok(());
+//}
+
+//async fn update(data: &Data, pool: &sqlx::PgPool) -> Result<(), Box<dyn Error>> {
+//  let query = "UPDATE users_list SET first_name=$1, last_name=$2, birthdate=$3, salary=$4 WHERE id=$5";
+//
+//  sqlx::query(query)
+//    .bind(&data.first_name)
+//    .bind(&data.last_name)
+//    .bind(&data.birthdate as &NaiveDate)
+//    .bind(&data.salary)
+//    .bind(&data.data_id)
+//    .execute(pool)
+//    .await?;
+//
+//    return Ok(());
+//}
+
+//async fn read(conn: &sqlx::PgPool) -> Result<Data, Box<dyn Error>> {
+//async fn read(conn: &sqlx::PgPool) -> Result<Vec<Data>, Box<dyn Error>> {
+  //let q = "SELECT first_name, last_name, birthdate, salary FROM users_list";
+  //let query = sqlx::query(q);
+  
+  //let row = query.fetch_one(conn).await?;
+  //  let data = Data {
+    //    data_id: row.get("id"),
+    //    first_name: row.get("first_name"),
+    //    last_name: row.get("last_name"),
+    //    birthdate: row.get("birthdate"),
+    //    salary: row.get("salary"),
+    //};
+    //let mut rows = query.fetch(conn);
+    //let mut datas = vec![];
+
+//  while let Some(row) = rows.try_next().await? {
+//    datas.push(Data {
+//      //data_id: row.get("id"),
+//      first_name: row.get("first_name"),
+//      last_name: row.get("last_name"),
+//      birthdate: row.get("birthdate"),
+//      salary: row.get("salary"),
+//    });
+//  }
+
+//Ok(datas)
+//}
+
+#[tokio::main]
+async fn main () -> Result<(), Box<dyn Error>> {
+  //let url = "postgres://postgres:password123@localhost/maindb";
+  //let pool = sqlx::postgres::PgPool::connect(url).await?;
+  //let new_person = Data {
+  //  data_id: 3,
+  //  first_name: "Downey".to_string(),
+  //  last_name: "Robert".to_string(),
+  //  birthdate: NaiveDate::parse_from_str("1989-10-11", "%Y-%m-%d")?, // Parse date string
+  //  salary: 40000,           
+  //};
+
+  //let data = read(&pool).await?;
+  //let serialized = serde_json::to_string(&data)?;
+  //println!("Serialized: {}", serialized);
+
+  println!("hello world");
+  let mut file = File::open("data.json")?;
+    let mut contents = String::new();
+    file.read_to_string(&mut contents)?;
+    let data2:Vec<Data> = from_reader(contents.as_bytes())?;
+    println!("Deserialized: {:?}", data2);
+
+  //println!("{:?}", data);
+  Ok(())
+}
+
+
+
+async fn users_list(_user_ctx: UserCtx, user: &Users, pool: &sqlx::PgPool) -> Result<Json, warp::Rejection> {
+    let q = "SELECT first_name, last_name, birthdate, salary FROM users_list";
+    let query = sqlx::query(q);
+      let mut rows = query.fetch(pool);
+    let mut users: Vec<Users> = vec![];
+
+    while let Some(row) = rows.try_next().await? {
+        users.push(Users {
+        data_id: row.get("id"),
+        first_name: row.get("first_name"),
+        last_name: row.get("last_name"),
+        birthdate: row.get("birthdate"),
+        salary: row.get("salary"),
+        });
+    }
+    let user = warp::reply::json(&users);
+    Ok(user)
+}

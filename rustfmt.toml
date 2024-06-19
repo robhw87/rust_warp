@@ -1,0 +1,12 @@
+# Enforce a maximum line length of 80 characters
+max_width = 80
+
+# Use 4 spaces for indentation (instead of the default 2)
+tab_spaces = 4
+
+# Wrap function calls exceeding 60 characters onto multiple lines
+fn_call_width = 60
+
+# Don't format code within doc comments
+format_code_in_doc_comments = false
+

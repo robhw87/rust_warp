@@ -1,0 +1,50 @@
+/*use tokio_postgres::NoTls;
+use tokio_postgres::types::Date; 
+
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+  // Connection string with host, user, etc.
+   let connection_string = "host=localhost user=postgres password=password123 dbname=maindb";
+  
+  // Establish connection with NoTls for demonstration (use a proper TLS configuration in production)
+  let (client, connection) = tokio_postgres::connect(connection_string, NoTls).await?;
+
+    tokio::spawn(async move {
+      if let Err(e) = connection.await {
+          eprintln!("connection error: {}", e);
+        }
+    });
+  let rows = client.query("SELECT * FROM paw_jadwal", &[]).await?;
+
+  // Loop through the rows and access data
+  for row in rows {
+    let service_date = row.get::<_,>("service_date");
+    let pos = row.get::<_,String>("pos");
+    let name = row.get::<_,String>("name");
+    println!("tgl pelayanan: {}, sebagai {}, yang bertugas: {}", service_date, pos, name);
+  }
+
+  Ok(())
+}
+*/
+
+use sqlx::postgres::PgPoolOptions;
+use sqlx::Row;
+
+#[tokio::main]
+async fn main() -> Result<(), sqlx::Error> {
+    let pool = PgPoolOptions::new()
+        .max_connections(5)
+        .connect("postgres://postgres:password123@localhost/maindb")
+        .await?;
+
+    let row: (i64,) = sqlx::query_as("SELECT $1")
+        .bind(150_i64)
+        .fetch_one(&pool)
+        .await?;
+
+    println!("Got: {:?}", row.0);
+
+    Ok(())
+}

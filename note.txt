@@ -1,0 +1,15 @@
+cargo watch -q -c -w src/ -x run
+
+
+
+
+pub fn users_filter() -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
+    let base_url = warp::path("users");
+    let get = base_url
+        .and(warp::get())
+        .and(do_auth())
+        .and(warp::path::param())
+        .and_then(users_get);
+
+    get
+}
